@@ -1,0 +1,2 @@
+zypper-update-requestor
+=======================
