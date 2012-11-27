@@ -44,7 +44,7 @@ function is_zypper_ready(&$output) {
   return true;
 }
 
-function parse_httpd_log(&$updateIDs, &$update_all_patches, &$update_patches, &$update_all_packages, &$update_packages) {
+function parse_httpd_log(&$commands, &$updateIDs, &$update_all_patches, &$update_patches, &$update_all_packages, &$update_packages) {
   global $HTTPD_LOG, $RUNFILE, $TASK_PSK;
 
   if (! file_exists($RUNFILE))
@@ -123,11 +123,17 @@ EOT;
 }
 
 
-if (parse_httpd_log($updateIDs, $update_all_patches, $update_patches, $update_all_packages, $update_packages)) {
+if (parse_httpd_log($commands, $updateIDs, $update_all_patches, $update_patches, $update_all_packages, $update_packages)) {
+  $message = 'The following tasks are applied:\n'
+  for ($commands as $task) {
+    $message .= "  - ${task}\n";
+  }
+  $message .= "\n\nLogging:\n\n";
+
   $output = array();
 
   if (! is_zypper_ready($ready_message)) {
-    send_mail($ready_message, '');
+    send_mail($message . $ready_message, '');
     exit;
   }
  
@@ -186,6 +192,6 @@ if (parse_httpd_log($updateIDs, $update_all_patches, $update_patches, $update_al
     file_put_contents($RUNFILE, implode("\n", $updateIDs_new));
   }
 
-  send_mail(implode("\n", $output), '');
+  send_mail($message . implode("\n", $output), '');
 }
 ?>
