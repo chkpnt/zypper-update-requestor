@@ -44,14 +44,20 @@ function is_zypper_ready(&$output) {
   return true;
 }
 
-function parse_httpd_log(&$update_all_patches, &$update_patches, &$update_all_packages, &$update_packages) {
+function parse_httpd_log(&$updateIDs, &$update_all_patches, &$update_patches, &$update_all_packages, &$update_packages) {
   global $HTTPD_LOG, $RUNFILE, $TASK_PSK;
 
   if (! file_exists($RUNFILE))
     return false;
 
-  $updateID = trim(file_get_contents($RUNFILE));
-  exec(sprintf(CMD_FGREP_LOG, $updateID, $HTTPD_LOG), $entries, $exit);
+  // trim in order to remove a possible \n
+  // filter in order to remove possible empty lines
+  $updateIDs = array_filter(array_map('trim', file($RUNFILE)));
+  
+  $entries = array();
+  foreach ($updateIDs as $updateID) {
+    exec(sprintf(CMD_FGREP_LOG, $updateID, $HTTPD_LOG), $entries, $exit);
+  }
 
   if (empty($entries))
     return false;
@@ -117,7 +123,7 @@ EOT;
 }
 
 
-if (parse_httpd_log($update_all_patches, $update_patches, $update_all_packages, $update_packages)) {
+if (parse_httpd_log($updateIDs, $update_all_patches, $update_patches, $update_all_packages, $update_packages)) {
   $output = array();
 
   if (! is_zypper_ready($ready_message)) {
@@ -128,7 +134,7 @@ if (parse_httpd_log($update_all_patches, $update_patches, $update_all_packages, 
   if ($update_all_patches) {
     $cmd = sprintf(CMD_ZYPPER_UP_PATCH, '');
     $output[] = "# {$cmd}";
-    exec($cmd, $output, $exit);
+    exec($cmd, $output, $exit_patch);
   } else {
     if (! empty($update_patches)) {
       foreach ($update_patches as &$cmd) {
@@ -136,7 +142,7 @@ if (parse_httpd_log($update_all_patches, $update_patches, $update_all_packages, 
       }
       $cmd = sprintf(CMD_ZYPPER_UP_PATCH, implode(' ', $update_patches));
       $output[] = "# {$cmd}";
-      exec($cmd, $output, $exit);
+      exec($cmd, $output, $exit_patch);
     }
   }
   
@@ -147,7 +153,7 @@ if (parse_httpd_log($update_all_patches, $update_patches, $update_all_packages, 
   if ($update_all_packages) {
     $cmd = sprintf(CMD_ZYPPER_UP_PACKAGE, '');
     $output[] = "# {$cmd}";
-    exec($cmd, $output, $exit);
+    exec($cmd, $output, $exit_package);
   } else {
     if (! empty($update_packages)) {
       foreach ($update_packages as &$cmd) {
@@ -155,7 +161,7 @@ if (parse_httpd_log($update_all_patches, $update_patches, $update_all_packages, 
       }
       $cmd = sprintf(CMD_ZYPPER_UP_PACKAGE, implode(' ', $update_packages));
       $output[] = "# {$cmd}";
-      exec($cmd, $output, $exit);
+      exec($cmd, $output, $exit_package);
     }
   }
   
@@ -164,7 +170,19 @@ if (parse_httpd_log($update_all_patches, $update_patches, $update_all_packages, 
   $output[] = '';
   
   $output[] = '# ' . CMD_ZYPPER_PS;
-  exec(CMD_ZYPPER_PS, $output, $exit);
+  exec(CMD_ZYPPER_PS, $output, $exit_ps);
+
+  if (($exit_patch != 0 && $exit_patch < 100) || $exit_package != 0 || $exit_ps != 0) {
+    $output[] = '';
+    $output[] = '';
+    $output[] = '';
+    $output[] = 'At least one of the commands above did not exit with status code 0.' . "$exit_patch $exit_package $exit_ps";
+    $output[] = sprintf('UpdateID %s will not be removed from %s, thus the installation can be retried.', implode(', ', $updateIDs), $RUNFILE);
+  } else {
+    // only the newest $updateID is kept
+    $updateIDs_new = array_slice($updateIDs, -1);
+    file_put_contents($RUNFILE, implode("\n", $updateIDs_new));
+  }
 
   send_mail(implode("\n", $output), '');
 }
