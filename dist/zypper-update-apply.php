@@ -47,6 +47,9 @@ function is_zypper_ready(&$output) {
 function parse_httpd_log(&$update_all_patches, &$update_patches, &$update_all_packages, &$update_packages) {
   global $HTTPD_LOG, $RUNFILE, $TASK_PSK;
 
+  if (! file_exists($RUNFILE))
+    return false;
+
   $updateID = trim(file_get_contents($RUNFILE));
   exec(sprintf(CMD_FGREP_LOG, $updateID, $HTTPD_LOG), $entries, $exit);
 
