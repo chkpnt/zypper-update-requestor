@@ -24,10 +24,10 @@ $MAIL_SUBJECT_APPLY = "[zypper-update-request] Installation log of updates for %
 $MAIL_STYLE = 'html';
 
 // e.g.: /var/log/apache2/access_log
-$HTTPD_LOG = 'access_log';
+$HTTPD_LOG = '../demo/access_log';
 
 // e.g.: /var/run/zypper-update-requestor/update.id
-$RUNFILE = 'update.id';
+$RUNFILE = '../demo/update.id';
 
 // can be "x509" or "none"
 $MAIL_ENCRYPTION = 'none';
