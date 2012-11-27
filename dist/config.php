@@ -16,7 +16,7 @@ $MAIL_TO = 'admin@example.com';
 
 // %s will be replaced by the hostname
 $MAIL_SUBJECT_REQUEST = "[zypper-update-request] New updates available for %s";
-$MAIL_SUBJECT_APPLY = "[zypper-update-request] Installation log of updates for %s";
+$MAIL_SUBJECT_APPLY = "[zypper-update-apply] Logging of %s";
 
 // "text": a text mail is sent.
 // "html": an html mail, which includes the text mail as an alternative,
