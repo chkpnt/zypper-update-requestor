@@ -54,19 +54,19 @@ function parse_httpd_log(&$updateIDs, &$update_all_patches, &$update_patches, &$
   // filter in order to remove possible empty lines
   $updateIDs = array_filter(array_map('trim', file($RUNFILE)));
   
-  $entries = array();
+  $commands = array();
+
   foreach ($updateIDs as $updateID) {
+    $entries = array();
     exec(sprintf(CMD_FGREP_LOG, $updateID, $HTTPD_LOG), $entries, $exit);
+    foreach ($entries as $entry) {
+      preg_match("@{$updateID}/([^ ]+)@", $entry, $matches);
+      $commands[] = mc_decrypt($matches[1], $TASK_PSK);
+    }
   }
 
   if (empty($entries))
     return false;
-
-  $commands = array();
-  foreach ($entries as $entry) {
-    preg_match("@{$updateID}/([^ ]+)@", $entry, $matches);
-    $commands[] = mc_decrypt($matches[1], $TASK_PSK);
-  }
   
   $cmds_all_patches = preg_grep('@/all-patches@', $commands);
   $update_all_patches = ! empty($cmds_all_patches);
