@@ -189,7 +189,7 @@ if (parse_httpd_log($commands, $updateIDs, $update_all_patches, $update_patches,
   } else {
     // only the newest $updateID is kept
     $updateIDs_new = array_slice($updateIDs, -1);
-    file_put_contents($RUNFILE, implode("\n", $updateIDs_new));
+    file_put_contents($RUNFILE, implode("\n", $updateIDs_new) . "\n");
   }
 
   send_mail($message . implode("\n", $output), '');
