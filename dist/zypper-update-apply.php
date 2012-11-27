@@ -130,7 +130,8 @@ if (parse_httpd_log($updateIDs, $update_all_patches, $update_patches, $update_al
     send_mail($ready_message, '');
     exit;
   }
-  
+ 
+  $exit_patch = 0;
   if ($update_all_patches) {
     $cmd = sprintf(CMD_ZYPPER_UP_PATCH, '');
     $output[] = "# {$cmd}";
@@ -150,6 +151,7 @@ if (parse_httpd_log($updateIDs, $update_all_patches, $update_patches, $update_al
   $output[] = '';
   $output[] = '';
   
+  $exit_package = 0;
   if ($update_all_packages) {
     $cmd = sprintf(CMD_ZYPPER_UP_PACKAGE, '');
     $output[] = "# {$cmd}";
