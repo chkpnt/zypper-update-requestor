@@ -34,7 +34,7 @@ function generate_and_set_updateID() {
   $updateID = base64_encode(pack('H*', preg_replace('/[^0-9a-fA-F]/', '', uniqid('', true))));
   $updateID = preg_replace('@[/=]@', '', $updateID);
 
-  file_put_contents($RUNFILE, $updateID, FILE_APPEND);  
+  file_put_contents($RUNFILE, $updateID . "\n", FILE_APPEND);  
 }
 
 function generate_confirmation_url($type, $name = null) {
