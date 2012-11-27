@@ -124,7 +124,7 @@ EOT;
 
 
 if (parse_httpd_log($commands, $updateIDs, $update_all_patches, $update_patches, $update_all_packages, $update_packages)) {
-  $message = 'The following tasks are applied:\n'
+  $message = 'The following tasks are applied:\n';
   foreach ($commands as $task) {
     $message .= "  - ${task}\n";
   }
