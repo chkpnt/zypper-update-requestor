@@ -56,14 +56,11 @@ function parse_httpd_log(&$update_all_patches, &$update_patches, &$update_all_pa
   if (empty($entries))
     return false;
 
-  print_r($entries);
-
   $commands = array();
   foreach ($entries as $entry) {
     preg_match("@{$updateID}/([^ ]+)@", $entry, $matches);
     $commands[] = mc_decrypt($matches[1], $TASK_PSK);
   }
-  print_r($commands);
   
   $cmds_all_patches = preg_grep('@/all-patches@', $commands);
   $update_all_patches = ! empty($cmds_all_patches);
@@ -168,7 +165,6 @@ if (parse_httpd_log($update_all_patches, $update_patches, $update_all_packages, 
   
   $output[] = '# ' . CMD_ZYPPER_PS;
   exec(CMD_ZYPPER_PS, $output, $exit);
-  print_r($output);
 
   send_mail(implode("\n", $output), '');
 }
