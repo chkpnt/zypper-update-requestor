@@ -28,6 +28,10 @@ if(@php_sapi_name() != 'cli' && @php_sapi_name() != 'cgi' && @php_sapi_name() !=
 require_once 'config.php';
 require_once 'common.php';
 
+if ($URL_PREFIX === 'https://example.com/i/' || $MAIL_TO === 'root@example.com' || $MAIL_FROM === 'admin@example.com') {
+	die('zypper-update-requestor isn\'t configured yet.');
+}
+
 function generate_and_set_updateID() {
   global $updateID, $RUNFILE;
 
